@@ -114,13 +114,13 @@ const Hero = () => {
                 key={stat.label}
                 className="glass-card p-4 sm:p-6 text-center group hover:scale-105 transition-all duration-300"
               >
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <stat.icon className="w-6 h-6 text-white" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <stat.icon className="w-6 h-6 text-primary" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
+                <div className="text-2xl sm:text-3xl font-bold gradient-text mb-1">
                   {stat.value}
                 </div>
-                <div className="text-sm text-white/70">{stat.label}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
