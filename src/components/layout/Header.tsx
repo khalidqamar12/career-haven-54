@@ -16,11 +16,11 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Jobs', href: '#jobs' },
-    { name: 'Companies', href: '#companies' },
-    { name: 'Categories', href: '#categories' },
-    { name: 'How It Works', href: '#how-it-works' },
+    { name: 'Home', href: '/' },
+    { name: 'Jobs', href: '/jobs' },
+    { name: 'Testimonials', href: '/testimonials' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -48,15 +48,15 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className={`font-medium transition-all duration-300 hover:text-primary relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full ${
                   isScrolled ? 'text-foreground/80' : 'text-white/90'
                 }`}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -65,14 +65,16 @@ const Header = () => {
             <Button 
               variant={isScrolled ? "ghost" : "heroOutline"} 
               size="default"
+              asChild
             >
-              Sign In
+              <Link to="/login">Sign In</Link>
             </Button>
             <Button 
               variant={isScrolled ? "gradient" : "hero"} 
               size="default"
+              asChild
             >
-              Post a Job
+              <Link to="/employer/dashboard">Post a Job</Link>
             </Button>
           </div>
 
@@ -96,21 +98,21 @@ const Header = () => {
       >
         <nav className="container mx-auto px-4 py-6 flex flex-col gap-4">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-foreground/80 font-medium py-2 hover:text-primary transition-colors"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
           <div className="flex flex-col gap-3 pt-4 border-t border-border">
-            <Button variant="outline" className="w-full">
-              Sign In
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/login">Sign In</Link>
             </Button>
-            <Button variant="gradient" className="w-full">
-              Post a Job
+            <Button variant="gradient" className="w-full" asChild>
+              <Link to="/employer/dashboard">Post a Job</Link>
             </Button>
           </div>
         </nav>
