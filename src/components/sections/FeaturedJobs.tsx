@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, MapPin, Clock, DollarSign, Bookmark, ArrowRight, Filter, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -255,9 +256,11 @@ const FeaturedJobs = () => {
                     {job.posted}
                   </span>
                 </div>
-                <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary">
-                  Apply
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary" asChild>
+                  <Link to={`/apply/${job.id}`}>
+                    Apply
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -266,9 +269,11 @@ const FeaturedJobs = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button variant="gradient" size="lg" className="gap-2">
-            View All Jobs
-            <ArrowRight className="w-5 h-5" />
+          <Button variant="gradient" size="lg" className="gap-2" asChild>
+            <Link to="/jobs">
+              View All Jobs
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </Button>
         </div>
       </div>
