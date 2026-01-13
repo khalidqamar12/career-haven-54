@@ -91,9 +91,17 @@ const Testimonials = () => {
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center text-white font-semibold">
-                  {testimonial.avatar}
-                </div>
+                {testimonial.avatarImage ? (
+                  <img 
+                    src={testimonial.avatarImage} 
+                    alt={testimonial.name}
+                    className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full btn-gradient flex items-center justify-center text-white font-semibold">
+                    {testimonial.avatar}
+                  </div>
+                )}
                 <div>
                   <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
                   <p className="text-sm text-muted-foreground">

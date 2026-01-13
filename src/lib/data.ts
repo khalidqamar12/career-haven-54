@@ -23,6 +23,7 @@ export interface Testimonial {
   role: string;
   company: string;
   avatar: string;
+  avatarImage?: string;
   rating: number;
   quote: string;
   type: 'candidate' | 'employer';
@@ -378,6 +379,16 @@ export const jobs: Job[] = [
   }
 ];
 
+// Avatar imports
+import sarahJohnsonAvatar from '@/assets/avatars/sarah-johnson.jpg';
+import michaelChenAvatar from '@/assets/avatars/michael-chen.jpg';
+import emilyRodriguezAvatar from '@/assets/avatars/emily-rodriguez.jpg';
+import davidParkAvatar from '@/assets/avatars/david-park.jpg';
+import jessicaWilliamsAvatar from '@/assets/avatars/jessica-williams.jpg';
+import robertTaylorAvatar from '@/assets/avatars/robert-taylor.jpg';
+import amandaFosterAvatar from '@/assets/avatars/amanda-foster.jpg';
+import jamesWilsonAvatar from '@/assets/avatars/james-wilson.jpg';
+
 export const testimonials: Testimonial[] = [
   {
     id: 1,
@@ -385,6 +396,7 @@ export const testimonials: Testimonial[] = [
     role: 'Software Engineer',
     company: 'TechFlow Inc.',
     avatar: 'SJ',
+    avatarImage: sarahJohnsonAvatar,
     rating: 5,
     quote: 'I landed my first remote job in just 5 days using this platform. The process was smooth and transparent. The job matching algorithm really understood what I was looking for!',
     type: 'candidate'
@@ -395,6 +407,7 @@ export const testimonials: Testimonial[] = [
     role: 'HR Director',
     company: 'CloudScale',
     avatar: 'MC',
+    avatarImage: michaelChenAvatar,
     rating: 5,
     quote: 'We hired 3 qualified developers within a week. The filtering system saved us hours of screening. Best recruitment platform we have ever used!',
     type: 'employer'
@@ -405,6 +418,7 @@ export const testimonials: Testimonial[] = [
     role: 'Product Designer',
     company: 'DesignHub',
     avatar: 'ER',
+    avatarImage: emilyRodriguezAvatar,
     rating: 5,
     quote: 'The application process was seamless. I loved being able to track my applications in real-time and the personalized job recommendations were spot on.',
     type: 'candidate'
@@ -415,6 +429,7 @@ export const testimonials: Testimonial[] = [
     role: 'CEO',
     company: 'AppWorks',
     avatar: 'DP',
+    avatarImage: davidParkAvatar,
     rating: 5,
     quote: 'JobFlow has transformed our hiring process. We have reduced time-to-hire by 60% and the quality of candidates is exceptional. Highly recommended!',
     type: 'employer'
@@ -425,6 +440,7 @@ export const testimonials: Testimonial[] = [
     role: 'Data Scientist',
     company: 'DataDriven',
     avatar: 'JW',
+    avatarImage: jessicaWilliamsAvatar,
     rating: 5,
     quote: 'After months of struggling with other platforms, I found my dream job here in just 2 weeks. The salary transparency feature was incredibly helpful.',
     type: 'candidate'
@@ -435,6 +451,7 @@ export const testimonials: Testimonial[] = [
     role: 'Talent Acquisition Manager',
     company: 'GrowthLabs',
     avatar: 'RT',
+    avatarImage: robertTaylorAvatar,
     rating: 5,
     quote: 'The employer dashboard is intuitive and powerful. We can manage all our job postings and applications in one place. The analytics are invaluable.',
     type: 'employer'
@@ -445,6 +462,7 @@ export const testimonials: Testimonial[] = [
     role: 'Marketing Manager',
     company: 'ContentCraft',
     avatar: 'AF',
+    avatarImage: amandaFosterAvatar,
     rating: 5,
     quote: 'Transitioning careers felt daunting until I discovered JobFlow. The platform helped me showcase my transferable skills and land a role I love.',
     type: 'candidate'
@@ -455,6 +473,7 @@ export const testimonials: Testimonial[] = [
     role: 'CTO',
     company: 'InfraCore',
     avatar: 'JW',
+    avatarImage: jamesWilsonAvatar,
     rating: 5,
     quote: 'As a startup, we needed to scale our engineering team quickly. JobFlow delivered quality candidates that matched our culture perfectly.',
     type: 'employer'
