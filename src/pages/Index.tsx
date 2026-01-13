@@ -5,6 +5,7 @@ import FeaturedJobs from '@/components/sections/FeaturedJobs';
 import Categories from '@/components/sections/Categories';
 import Companies from '@/components/sections/Companies';
 import HowItWorks from '@/components/sections/HowItWorks';
+import Testimonials from '@/components/sections/Testimonials';
 import CTA from '@/components/sections/CTA';
 
 const Index = () => {
@@ -17,6 +18,7 @@ const Index = () => {
         <Categories />
         <Companies />
         <HowItWorks />
+        <Testimonials />
         <CTA />
       </main>
       <Footer />
