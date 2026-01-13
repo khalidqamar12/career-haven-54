@@ -27,7 +27,7 @@ const FeaturedJobs = () => {
       id: 1,
       title: 'Senior Frontend Developer',
       company: 'TechFlow Inc.',
-      logo: 'TF',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/react.svg',
       location: 'San Francisco, CA',
       type: 'Remote',
       salary: '$120k - $180k',
@@ -39,7 +39,7 @@ const FeaturedJobs = () => {
       id: 2,
       title: 'Product Designer',
       company: 'DesignHub',
-      logo: 'DH',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/figma.svg',
       location: 'New York, NY',
       type: 'Full-time',
       salary: '$90k - $130k',
@@ -51,7 +51,7 @@ const FeaturedJobs = () => {
       id: 3,
       title: 'Data Scientist',
       company: 'DataDriven',
-      logo: 'DD',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/python.svg',
       location: 'Austin, TX',
       type: 'Full-time',
       salary: '$130k - $170k',
@@ -62,7 +62,7 @@ const FeaturedJobs = () => {
       id: 4,
       title: 'Marketing Manager',
       company: 'GrowthLabs',
-      logo: 'GL',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googleanalytics.svg',
       location: 'Remote',
       type: 'Remote',
       salary: '$80k - $110k',
@@ -73,7 +73,7 @@ const FeaturedJobs = () => {
       id: 5,
       title: 'Backend Engineer',
       company: 'CloudScale',
-      logo: 'CS',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/amazonaws.svg',
       location: 'Seattle, WA',
       type: 'Full-time',
       salary: '$140k - $200k',
@@ -85,7 +85,7 @@ const FeaturedJobs = () => {
       id: 6,
       title: 'UX Researcher',
       company: 'UserFirst',
-      logo: 'UF',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/sketch.svg',
       location: 'Chicago, IL',
       type: 'Contract',
       salary: '$70k - $95k',
@@ -197,8 +197,17 @@ const FeaturedJobs = () => {
 
               {/* Company Logo & Info */}
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-14 h-14 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-lg shadow-md">
-                  {job.logo}
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-md border border-border overflow-hidden p-2.5">
+                  <img 
+                    src={job.logo} 
+                    alt={`${job.company} logo`}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = `<span class="text-primary font-bold text-lg">${job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}</span>`;
+                    }}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors truncate">

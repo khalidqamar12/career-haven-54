@@ -66,8 +66,17 @@ const JobCard = ({ job, index = 0 }: JobCardProps) => {
 
       {/* Company Logo & Info */}
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-14 h-14 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-lg shadow-md">
-          {job.logo}
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-md border border-border overflow-hidden p-2.5">
+          <img 
+            src={job.logo} 
+            alt={`${job.company} logo`}
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.parentElement!.innerHTML = `<span class="text-primary font-bold text-lg">${job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}</span>`;
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <Link to={`/jobs/${job.id}`}>

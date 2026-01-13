@@ -5,63 +5,63 @@ const Companies = () => {
   const companies = [
     {
       name: 'TechFlow Inc.',
-      logo: 'TF',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/react.svg',
       industry: 'Technology',
       location: 'San Francisco, CA',
       employees: '1,000-5,000',
       openings: 42,
       rating: 4.8,
-      gradient: 'from-violet-500 to-purple-600',
+      bgColor: 'bg-gradient-to-br from-cyan-500/10 to-blue-500/10',
     },
     {
       name: 'DesignHub',
-      logo: 'DH',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/figma.svg',
       industry: 'Design Agency',
       location: 'New York, NY',
       employees: '100-500',
       openings: 18,
       rating: 4.9,
-      gradient: 'from-pink-500 to-rose-500',
+      bgColor: 'bg-gradient-to-br from-pink-500/10 to-purple-500/10',
     },
     {
       name: 'CloudScale',
-      logo: 'CS',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/amazonaws.svg',
       industry: 'Cloud Computing',
       location: 'Seattle, WA',
       employees: '5,000-10,000',
       openings: 67,
       rating: 4.7,
-      gradient: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-orange-500/10 to-amber-500/10',
     },
     {
       name: 'DataDriven',
-      logo: 'DD',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/python.svg',
       industry: 'Data Analytics',
       location: 'Austin, TX',
       employees: '500-1,000',
       openings: 29,
       rating: 4.6,
-      gradient: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-gradient-to-br from-blue-500/10 to-yellow-500/10',
     },
     {
       name: 'GrowthLabs',
-      logo: 'GL',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googleanalytics.svg',
       industry: 'Marketing Tech',
       location: 'Los Angeles, CA',
       employees: '200-500',
       openings: 15,
       rating: 4.5,
-      gradient: 'from-orange-500 to-amber-500',
+      bgColor: 'bg-gradient-to-br from-orange-500/10 to-yellow-500/10',
     },
     {
       name: 'FinanceFlow',
-      logo: 'FF',
+      logo: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/stripe.svg',
       industry: 'FinTech',
       location: 'Chicago, IL',
       employees: '1,000-5,000',
       openings: 34,
       rating: 4.7,
-      gradient: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-gradient-to-br from-indigo-500/10 to-purple-500/10',
     },
   ];
 
@@ -101,8 +101,17 @@ const Companies = () => {
             >
               {/* Header */}
               <div className="flex items-start gap-4 mb-5">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${company.gradient} flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  {company.logo}
+                <div className={`w-16 h-16 rounded-2xl ${company.bgColor} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 border border-border p-3`}>
+                  <img 
+                    src={company.logo} 
+                    alt={`${company.name} logo`}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = `<span class="text-primary font-bold text-xl">${company.name.split(' ').map(w => w[0]).join('').slice(0, 2)}</span>`;
+                    }}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors truncate">
