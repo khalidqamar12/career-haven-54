@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, LogOut, User, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
 import logo from '@/assets/logo.png';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, profile, signOut, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +27,11 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Jobs', href: '/jobs' },
@@ -23,6 +39,15 @@ const Header = () => {
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const getDashboardLink = () => {
+    return profile?.user_type === 'employer' ? '/employer/dashboard' : '/candidate/dashboard';
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   return (
     <header
@@ -61,22 +86,59 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Desktop CTA Buttons */}
+          {/* Desktop CTA Buttons / User Menu */}
           <div className="hidden lg:flex items-center gap-4">
-            <Button 
-              variant={isScrolled ? "ghost" : "heroOutline"} 
-              size="default"
-              asChild
-            >
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button 
-              variant={isScrolled ? "gradient" : "hero"} 
-              size="default"
-              asChild
-            >
-              <Link to="/employer/dashboard">Post a Job</Link>
-            </Button>
+            {!loading && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={profile?.avatar_url || undefined} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {getInitials(profile?.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className={`font-medium ${isScrolled ? 'text-foreground' : 'text-white'}`}>
+                      {profile?.full_name || user.email}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link to={getDashboardLink()} className="flex items-center gap-2 cursor-pointer">
+                      {profile?.user_type === 'employer' ? (
+                        <Building2 className="w-4 h-4" />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button 
+                  variant={isScrolled ? "ghost" : "heroOutline"} 
+                  size="default"
+                  asChild
+                >
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button 
+                  variant={isScrolled ? "gradient" : "hero"} 
+                  size="default"
+                  asChild
+                >
+                  <Link to="/login">Post a Job</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -109,12 +171,41 @@ const Header = () => {
             </Link>
           ))}
           <div className="flex flex-col gap-3 pt-4 border-t border-border">
-            <Button variant="outline" className="w-full" asChild>
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button variant="gradient" className="w-full" asChild>
-              <Link to="/employer/dashboard">Post a Job</Link>
-            </Button>
+            {!loading && user ? (
+              <>
+                <div className="flex items-center gap-3 py-2">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {getInitials(profile?.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{profile?.full_name || user.email}</span>
+                </div>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={getDashboardLink()} onClick={() => setIsMobileMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-destructive" 
+                  onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
+                </Button>
+                <Button variant="gradient" className="w-full" asChild>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>Post a Job</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
       </div>

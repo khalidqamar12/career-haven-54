@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   FileText,
@@ -13,20 +13,28 @@ import {
   Building2,
   MapPin,
   TrendingUp,
-  Bell,
-  Search
+  Search,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
 import { jobs } from '@/lib/data';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CandidateDashboard = () => {
-  const { applications, savedJobs, user } = useApp();
+  const { applications, savedJobs } = useApp();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved' | 'profile'>('applications');
 
   const savedJobsList = jobs.filter(job => savedJobs.includes(job.id));
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -60,6 +68,11 @@ const CandidateDashboard = () => {
       default:
         return null;
     }
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -129,9 +142,9 @@ const CandidateDashboard = () => {
             <div className="bg-card rounded-2xl border border-border p-6 sticky top-28">
               <div className="text-center mb-6">
                 <div className="w-20 h-20 mx-auto rounded-full btn-gradient flex items-center justify-center text-white font-bold text-2xl mb-3">
-                  {user?.name?.charAt(0) || 'U'}
+                  {getInitials(profile?.full_name)}
                 </div>
-                <h3 className="font-semibold text-foreground">{user?.name || 'User'}</h3>
+                <h3 className="font-semibold text-foreground">{profile?.full_name || 'User'}</h3>
                 <p className="text-sm text-muted-foreground">{user?.email || 'user@example.com'}</p>
               </div>
               <nav className="space-y-2">
@@ -167,6 +180,13 @@ const CandidateDashboard = () => {
                 >
                   <User className="w-5 h-5" />
                   Profile Settings
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Sign Out
                 </button>
               </nav>
             </div>
@@ -290,12 +310,28 @@ const CandidateDashboard = () => {
             {activeTab === 'profile' && (
               <div className="bg-card rounded-2xl border border-border p-6">
                 <h2 className="text-xl font-semibold text-foreground mb-6">Profile Settings</h2>
-                <div className="text-center py-12">
-                  <Settings className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Profile settings coming soon...</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Please <Link to="/login" className="text-primary hover:underline">sign in</Link> to manage your profile
-                  </p>
+                <div className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Full Name</p>
+                      <p className="font-medium text-foreground">{profile?.full_name || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium text-foreground">{user?.email || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="font-medium text-foreground">{profile?.phone || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Account Type</p>
+                      <p className="font-medium text-foreground capitalize">{profile?.user_type || 'Candidate'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 text-center">
+                    <p className="text-sm text-muted-foreground">Profile editing coming soon...</p>
+                  </div>
                 </div>
               </div>
             )}
