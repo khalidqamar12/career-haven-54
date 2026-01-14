@@ -1,5 +1,7 @@
 import { UserPlus, Search, FileCheck, PartyPopper, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '@/components/ui/motion';
 
 const HowItWorks = () => {
   const steps = [
@@ -37,49 +39,104 @@ const HowItWorks = () => {
     <section id="how-it-works" className="py-20 sm:py-28 gradient-bg relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px]" />
-      <div className="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-white/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+      <motion.div 
+        className="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"
+        animate={{ y: [0, -20, 0], scale: [1, 1.1, 1] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div 
+        className="absolute bottom-20 right-10 w-80 h-80 bg-white/5 rounded-full blur-3xl"
+        animate={{ y: [0, 20, 0], scale: [1, 1.15, 1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+      />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-block px-4 py-2 rounded-full glass text-white/90 text-sm font-semibold mb-4">
+        <motion.div 
+          className="text-center max-w-3xl mx-auto mb-16"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={staggerContainer}
+        >
+          <motion.span 
+            variants={fadeInUp}
+            className="inline-block px-4 py-2 rounded-full glass text-white/90 text-sm font-semibold mb-4"
+          >
             Simple Process
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+          </motion.span>
+          <motion.h2 
+            variants={fadeInUp}
+            className="text-white mb-4"
+          >
             How It Works
-          </h2>
-          <p className="text-lg text-white/80">
+          </motion.h2>
+          <motion.p 
+            variants={fadeInUp}
+            className="text-lg text-white/80"
+          >
             Your journey to the perfect job is just four simple steps away
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Steps */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 relative">
           {/* Connection Line (Desktop) */}
-          <div className="hidden lg:block absolute top-20 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-white/0 via-white/30 to-white/0" />
+          <motion.div 
+            className="hidden lg:block absolute top-20 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-white/0 via-white/30 to-white/0"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.5 }}
+          />
 
           {steps.map((step, index) => (
-            <div
+            <motion.div
               key={step.number}
               className="relative text-center group"
-              style={{ animationDelay: `${index * 0.15}s` }}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                delay: index * 0.15, 
+                duration: 0.6, 
+                ease: [0.22, 1, 0.36, 1] 
+              }}
             >
               {/* Step Number (Mobile) */}
-              <div className="lg:hidden text-7xl font-bold text-white/10 absolute -top-4 left-1/2 -translate-x-1/2">
+              <motion.div 
+                className="lg:hidden text-7xl font-bold text-white/10 absolute -top-4 left-1/2 -translate-x-1/2"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 + 0.3 }}
+              >
                 {step.number}
-              </div>
+              </motion.div>
 
               {/* Icon Container */}
-              <div className="relative inline-block mb-6">
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300`}>
+              <motion.div 
+                className="relative inline-block mb-6"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              >
+                <motion.div 
+                  className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-xl`}
+                  whileHover={{ rotate: 5 }}
+                >
                   <step.icon className="w-10 h-10 text-white" />
-                </div>
+                </motion.div>
                 {/* Step Number Badge */}
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white text-primary font-bold text-sm flex items-center justify-center shadow-lg">
+                <motion.div 
+                  className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white text-primary font-bold text-sm flex items-center justify-center shadow-lg"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 + 0.4, type: 'spring', stiffness: 500 }}
+                >
                   {step.number.replace('0', '')}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
               {/* Content */}
               <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
@@ -87,19 +144,35 @@ const HowItWorks = () => {
 
               {/* Arrow (Desktop) */}
               {index < steps.length - 1 && (
-                <ArrowRight className="hidden lg:block absolute top-20 -right-4 w-8 h-8 text-white/30" />
+                <motion.div
+                  className="hidden lg:block absolute top-20 -right-4"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.15 + 0.5 }}
+                >
+                  <ArrowRight className="w-8 h-8 text-white/30" />
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-16">
-          <Button variant="hero" size="xl" className="gap-2">
-            Get Started Now
-            <ArrowRight className="w-5 h-5" />
-          </Button>
-        </div>
+        <motion.div 
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.6 }}
+        >
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="hero" size="xl" className="gap-2">
+              Get Started Now
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

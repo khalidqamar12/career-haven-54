@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Clock, DollarSign, Bookmark, ArrowRight, Filter, Building2 } from 'lucide-react';
+import { Heart, MapPin, Clock, DollarSign, ArrowRight, Filter, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '@/components/ui/motion';
 
 interface Job {
   id: number;
@@ -130,22 +132,43 @@ const FeaturedJobs = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
+        <motion.div 
+          className="text-center max-w-3xl mx-auto mb-12"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={staggerContainer}
+        >
+          <motion.span 
+            variants={fadeInUp}
+            className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4"
+          >
             Featured Opportunities
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          </motion.span>
+          <motion.h2 
+            variants={fadeInUp}
+            className="text-foreground mb-4"
+          >
             Latest Job Openings
-          </h2>
-          <p className="text-lg text-muted-foreground">
+          </motion.h2>
+          <motion.p 
+            variants={fadeInUp}
+            className="text-lg text-muted-foreground"
+          >
             Discover your next career move with hand-picked opportunities from top companies
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
-          {filters.map((filter) => (
-            <button
+        <motion.div 
+          className="flex flex-wrap items-center justify-center gap-3 mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          {filters.map((filter, index) => (
+            <motion.button
               key={filter}
               onClick={() => setActiveFilter(filter)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -153,39 +176,67 @@ const FeaturedJobs = () => {
                   ? 'btn-gradient text-white shadow-glow'
                   : 'bg-card border border-border text-muted-foreground hover:border-primary/30 hover:text-foreground'
               }`}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {filter}
-            </button>
+            </motion.button>
           ))}
-          <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="w-4 h-4" />
-            More Filters
-          </Button>
-        </div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="w-4 h-4" />
+              More Filters
+            </Button>
+          </motion.div>
+        </motion.div>
 
         {/* Jobs Grid */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <motion.div 
+          className="grid md:grid-cols-2 xl:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          variants={staggerContainer}
+        >
           {filteredJobs.map((job, index) => (
-            <div
+            <motion.div
               key={job.id}
-              className={`group relative bg-card rounded-2xl border border-border p-6 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/20 ${
+              className={`group relative bg-card rounded-2xl border border-border p-6 transition-all duration-300 ${
                 job.featured ? 'ring-2 ring-primary/20' : ''
               }`}
-              style={{ animationDelay: `${index * 0.1}s` }}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ 
+                y: -8, 
+                boxShadow: '0 20px 50px -15px rgba(0,0,0,0.12)',
+                borderColor: 'hsl(var(--primary) / 0.3)'
+              }}
             >
               {/* Featured Badge */}
               {job.featured && (
-                <div className="absolute -top-3 left-6">
+                <motion.div 
+                  className="absolute -top-3 left-6"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full shadow-glow">
                     Featured
                   </span>
-                </div>
+                </motion.div>
               )}
 
               {/* Save Button */}
-              <button
+              <motion.button
                 onClick={() => toggleSaveJob(job.id)}
                 className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <Heart
                   className={`w-5 h-5 transition-colors ${
@@ -194,11 +245,15 @@ const FeaturedJobs = () => {
                       : 'text-muted-foreground'
                   }`}
                 />
-              </button>
+              </motion.button>
 
               {/* Company Logo & Info */}
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-md border border-border overflow-hidden p-2.5">
+                <motion.div 
+                  className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-md border border-border overflow-hidden p-2.5"
+                  whileHover={{ scale: 1.1, rotate: 3 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
                   <img 
                     src={job.logo} 
                     alt={`${job.company} logo`}
@@ -209,7 +264,7 @@ const FeaturedJobs = () => {
                       target.parentElement!.innerHTML = `<span class="text-primary font-bold text-lg">${job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}</span>`;
                     }}
                   />
-                </div>
+                </motion.div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                     {job.title}
@@ -235,13 +290,17 @@ const FeaturedJobs = () => {
 
               {/* Skills */}
               <div className="flex flex-wrap gap-2 mb-5">
-                {job.skills.map((skill) => (
-                  <span
+                {job.skills.map((skill, skillIndex) => (
+                  <motion.span
                     key={skill}
                     className="px-3 py-1 bg-muted text-muted-foreground text-xs font-medium rounded-lg"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.1 + skillIndex * 0.05 }}
                   >
                     {skill}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
 
@@ -256,26 +315,36 @@ const FeaturedJobs = () => {
                     {job.posted}
                   </span>
                 </div>
-                <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary" asChild>
-                  <Link to={`/apply/${job.id}`}>
-                    Apply
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
+                <motion.div whileHover={{ x: 3 }}>
+                  <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary" asChild>
+                    <Link to={`/apply/${job.id}`}>
+                      Apply
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </Button>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
-          <Button variant="gradient" size="lg" className="gap-2" asChild>
-            <Link to="/jobs">
-              View All Jobs
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </Button>
-        </div>
+        <motion.div 
+          className="text-center mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="gradient" size="lg" className="gap-2" asChild>
+              <Link to="/jobs">
+                View All Jobs
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

@@ -12,6 +12,8 @@ import {
   Headphones,
   Briefcase
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '@/components/ui/motion';
 
 const Categories = () => {
   const categories = [
@@ -36,31 +38,70 @@ const Categories = () => {
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <span className="inline-block px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-semibold mb-4">
+        <motion.div 
+          className="text-center max-w-3xl mx-auto mb-14"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={staggerContainer}
+        >
+          <motion.span 
+            variants={fadeInUp}
+            className="inline-block px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-semibold mb-4"
+          >
             Explore Categories
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
+          </motion.span>
+          <motion.h2 
+            variants={fadeInUp}
+            className="text-foreground mb-4"
+          >
             Browse by Industry
-          </h2>
-          <p className="text-lg text-muted-foreground">
+          </motion.h2>
+          <motion.p 
+            variants={fadeInUp}
+            className="text-lg text-muted-foreground"
+          >
             Find opportunities in the industry that matches your expertise and passion
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6">
+        <motion.div 
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          variants={staggerContainer}
+        >
           {categories.map((category, index) => (
-            <div
+            <motion.div
               key={category.name}
               className="group cursor-pointer"
-              style={{ animationDelay: `${index * 0.05}s` }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ 
+                delay: index * 0.05, 
+                duration: 0.4, 
+                ease: [0.22, 1, 0.36, 1] 
+              }}
+              whileHover={{ y: -8 }}
             >
-              <div className="bg-card rounded-2xl border border-border p-6 text-center transition-all duration-300 hover:shadow-card-hover hover:-translate-y-2 hover:border-primary/20">
+              <motion.div 
+                className="bg-card rounded-2xl border border-border p-6 text-center transition-all duration-300 h-full"
+                whileHover={{ 
+                  boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)',
+                  borderColor: 'hsl(var(--primary) / 0.3)'
+                }}
+              >
                 {/* Icon Container */}
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <motion.div 
+                  className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center shadow-lg`}
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
                   <category.icon className="w-8 h-8 text-white" />
-                </div>
+                </motion.div>
                 
                 {/* Category Name */}
                 <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
@@ -71,10 +112,10 @@ const Categories = () => {
                 <p className="text-sm text-muted-foreground">
                   {category.jobs.toLocaleString()} jobs
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
