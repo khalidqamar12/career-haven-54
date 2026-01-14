@@ -31,7 +31,7 @@ export interface Testimonial {
 
 export interface Application {
   id: string;
-  jobId: number;
+  jobId: string | number;
   jobTitle: string;
   company: string;
   fullName: string;

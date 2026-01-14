@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
-import { jobs } from '@/lib/data';
+import { useJob } from '@/hooks/useJobs';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 
@@ -30,7 +30,7 @@ const ApplyForm = () => {
   const navigate = useNavigate();
   const { addApplication } = useApp();
   
-  const job = jobs.find(j => j.id === Number(id));
+  const { data: job, isLoading: jobLoading } = useJob(id || '');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -48,6 +48,17 @@ const ApplyForm = () => {
     availability: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  if (jobLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground mt-4">Loading job details...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!job) {
     return (

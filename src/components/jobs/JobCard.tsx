@@ -2,17 +2,20 @@ import { Heart, MapPin, Clock, DollarSign, Building2, ArrowRight } from 'lucide-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Job } from '@/lib/data';
-import { useApp } from '@/contexts/AppContext';
+import { TransformedJob } from '@/hooks/useJobs';
 
 interface JobCardProps {
-  job: Job;
+  job: TransformedJob;
   index?: number;
 }
 
+import { useApp } from '@/contexts/AppContext';
+
 const JobCard = ({ job, index = 0 }: JobCardProps) => {
   const { savedJobs, toggleSavedJob } = useApp();
-  const isSaved = savedJobs.includes(job.id);
+  // Convert string ID to number for savedJobs compatibility
+  const numericId = typeof job.id === 'string' ? parseInt(job.id, 10) : job.id;
+  const isSaved = !isNaN(numericId) && savedJobs.includes(numericId);
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -53,7 +56,9 @@ const JobCard = ({ job, index = 0 }: JobCardProps) => {
       <button
         onClick={(e) => {
           e.preventDefault();
-          toggleSavedJob(job.id);
+          if (!isNaN(numericId)) {
+            toggleSavedJob(numericId);
+          }
         }}
         className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors"
       >

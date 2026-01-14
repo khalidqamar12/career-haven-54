@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, Filter, X, ChevronDown, Calendar, Building2, Briefcase, DollarSign, Clock } from 'lucide-react';
+import { Search, MapPin, Filter, X, ChevronDown, Calendar, Building2, Briefcase, DollarSign, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,9 +13,10 @@ import {
 } from '@/components/ui/select';
 import PageLayout from '@/components/layout/PageLayout';
 import JobCard from '@/components/jobs/JobCard';
-import { jobs } from '@/lib/data';
+import { useAllJobs, TransformedJob } from '@/hooks/useJobs';
 
 const Jobs = () => {
+  const { jobs, isLoading, hasDbJobs } = useAllJobs();
   const [searchQuery, setSearchQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -71,8 +72,9 @@ const Jobs = () => {
     return 0;
   };
 
-  const getSalaryValue = (salary: string): number => {
-    const match = salary.match(/\$(\d+)k/);
+  const getSalaryValue = (job: TransformedJob): number => {
+    if (job.salaryMin) return Math.round(job.salaryMin / 1000);
+    const match = job.salary.match(/\$(\d+)k/);
     return match ? parseInt(match[1]) : 0;
   };
 
@@ -154,7 +156,7 @@ const Jobs = () => {
     // Salary range filter
     if (salaryRange[0] > 0 || salaryRange[1] < 200) {
       result = result.filter(job => {
-        const salary = getSalaryValue(job.salary);
+        const salary = getSalaryValue(job);
         return salary >= salaryRange[0] && salary <= salaryRange[1];
       });
     }
@@ -165,17 +167,17 @@ const Jobs = () => {
         result = result.sort((a, b) => getPostedDays(a.posted) - getPostedDays(b.posted));
         break;
       case 'salary-high':
-        result = result.sort((a, b) => getSalaryValue(b.salary) - getSalaryValue(a.salary));
+        result = result.sort((a, b) => getSalaryValue(b) - getSalaryValue(a));
         break;
       case 'salary-low':
-        result = result.sort((a, b) => getSalaryValue(a.salary) - getSalaryValue(b.salary));
+        result = result.sort((a, b) => getSalaryValue(a) - getSalaryValue(b));
         break;
       default:
         result = result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
 
     return result;
-  }, [searchQuery, locationQuery, selectedTypes, selectedExperience, selectedCategories, datePosted, salaryRange, sortBy]);
+  }, [jobs, searchQuery, locationQuery, selectedTypes, selectedExperience, selectedCategories, datePosted, salaryRange, sortBy]);
 
   const activeFiltersCount = 
     selectedTypes.length + 
