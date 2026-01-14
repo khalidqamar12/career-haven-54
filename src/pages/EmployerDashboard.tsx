@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   FileText,
@@ -16,16 +16,20 @@ import {
   CheckCircle,
   XCircle,
   MapPin,
-  DollarSign
+  DollarSign,
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
 import { jobs } from '@/lib/data';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const EmployerDashboard = () => {
-  const { applications, user } = useApp();
+  const { applications } = useApp();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'applications' | 'settings'>('overview');
 
   // Simulate employer's posted jobs (first 4 jobs)
@@ -35,6 +39,11 @@ const EmployerDashboard = () => {
   const employerApplications = applications.filter(app => 
     postedJobs.some(job => job.id === app.jobId)
   );
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -51,6 +60,11 @@ const EmployerDashboard = () => {
       default:
         return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'E';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -126,10 +140,10 @@ const EmployerDashboard = () => {
             <div className="bg-card rounded-2xl border border-border p-6 sticky top-28">
               <div className="text-center mb-6">
                 <div className="w-20 h-20 mx-auto rounded-full btn-gradient flex items-center justify-center text-white font-bold text-2xl mb-3">
-                  TF
+                  {getInitials(profile?.company_name || profile?.full_name)}
                 </div>
-                <h3 className="font-semibold text-foreground">TechFlow Inc.</h3>
-                <p className="text-sm text-muted-foreground">Premium Employer</p>
+                <h3 className="font-semibold text-foreground">{profile?.company_name || profile?.full_name || 'Employer'}</h3>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
               <nav className="space-y-2">
                 <button
@@ -180,6 +194,13 @@ const EmployerDashboard = () => {
                 >
                   <Settings className="w-5 h-5" />
                   Settings
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Sign Out
                 </button>
               </nav>
             </div>
@@ -393,9 +414,28 @@ const EmployerDashboard = () => {
             {activeTab === 'settings' && (
               <div className="bg-card rounded-2xl border border-border p-6">
                 <h2 className="text-xl font-semibold text-foreground mb-6">Company Settings</h2>
-                <div className="text-center py-12">
-                  <Settings className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Company settings coming soon...</p>
+                <div className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Company Name</p>
+                      <p className="font-medium text-foreground">{profile?.company_name || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium text-foreground">{user?.email || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Website</p>
+                      <p className="font-medium text-foreground">{profile?.company_website || 'Not set'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground">Account Type</p>
+                      <p className="font-medium text-foreground capitalize">{profile?.user_type || 'Employer'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-4 text-center">
+                    <p className="text-sm text-muted-foreground">Company settings editing coming soon...</p>
+                  </div>
                 </div>
               </div>
             )}
