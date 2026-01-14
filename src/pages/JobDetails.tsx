@@ -11,22 +11,37 @@ import {
   ArrowLeft,
   Briefcase,
   Globe,
-  Users
+  Users,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
 import JobCard from '@/components/jobs/JobCard';
-import { jobs } from '@/lib/data';
+import { useJob, useAllJobs } from '@/hooks/useJobs';
 import { useApp } from '@/contexts/AppContext';
 import { toast } from 'sonner';
 
 const JobDetails = () => {
   const { id } = useParams();
   const { savedJobs, toggleSavedJob } = useApp();
+  const { data: job, isLoading } = useJob(id || '');
+  const { jobs: allJobs } = useAllJobs();
   
-  const job = jobs.find(j => j.id === Number(id));
-  const isSaved = job ? savedJobs.includes(job.id) : false;
+  // Convert string ID to number for savedJobs compatibility
+  const numericId = id ? parseInt(id, 10) : NaN;
+  const isSaved = !isNaN(numericId) && savedJobs.includes(numericId);
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground mt-4">Loading job details...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!job) {
     return (
@@ -42,7 +57,7 @@ const JobDetails = () => {
     );
   }
 
-  const similarJobs = jobs
+  const similarJobs = allJobs
     .filter(j => j.id !== job.id && (j.type === job.type || j.skills.some(s => job.skills.includes(s))))
     .slice(0, 3);
 
@@ -101,8 +116,23 @@ const JobDetails = () => {
             {/* Header */}
             <div className="bg-card rounded-2xl border border-border p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row gap-6">
-                <div className="w-20 h-20 rounded-2xl btn-gradient flex items-center justify-center text-white font-bold text-2xl shadow-lg flex-shrink-0">
-                  {job.logo}
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-lg border border-border overflow-hidden flex-shrink-0">
+                  {job.logo ? (
+                    <img 
+                      src={job.logo} 
+                      alt={`${job.company} logo`}
+                      className="w-full h-full object-contain p-2"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = `<span class="text-primary font-bold text-2xl">${job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}</span>`;
+                      }}
+                    />
+                  ) : (
+                    <span className="text-primary font-bold text-2xl">
+                      {job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -117,7 +147,7 @@ const JobDetails = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => toggleSavedJob(job.id)}
+                        onClick={() => !isNaN(numericId) && toggleSavedJob(numericId)}
                         className="p-2 rounded-lg hover:bg-muted transition-colors"
                       >
                         <Heart
@@ -242,7 +272,7 @@ const JobDetails = () => {
                   variant="outline"
                   size="lg"
                   className="w-full"
-                  onClick={() => toggleSavedJob(job.id)}
+                  onClick={() => !isNaN(numericId) && toggleSavedJob(numericId)}
                 >
                   <Heart
                     className={`w-4 h-4 mr-2 ${
@@ -271,7 +301,7 @@ const JobDetails = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground text-sm">Experience</span>
-                    <span className="text-foreground text-sm font-medium">3+ years</span>
+                    <span className="text-foreground text-sm font-medium">{job.experienceLevel || '3+ years'}</span>
                   </div>
                 </div>
               </div>
