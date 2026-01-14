@@ -111,24 +111,32 @@ export const useJobs = () => {
   });
 };
 
+// Helper to check if ID is a valid UUID
+const isUUID = (id: string): boolean => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
 export const useJob = (id: string) => {
   return useQuery({
     queryKey: ['job', id],
     queryFn: async () => {
-      // First try to fetch from database
-      const { data, error } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+      // Check if ID is a valid UUID before querying database
+      if (isUUID(id)) {
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching job:', error);
-        throw error;
-      }
+        if (error) {
+          console.error('Error fetching job:', error);
+          throw error;
+        }
 
-      if (data) {
-        return transformJob(data);
+        if (data) {
+          return transformJob(data);
+        }
       }
 
       // Fallback to static data for numeric IDs
