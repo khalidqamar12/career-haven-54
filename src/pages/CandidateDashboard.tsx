@@ -4,7 +4,6 @@ import {
   Briefcase,
   FileText,
   Heart,
-  Settings,
   User,
   Clock,
   CheckCircle,
@@ -14,22 +13,27 @@ import {
   MapPin,
   TrendingUp,
   Search,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
-import { jobs } from '@/lib/data';
-import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { useApplications } from '@/hooks/useApplications';
+import { useAllJobs } from '@/hooks/useJobs';
 
 const CandidateDashboard = () => {
-  const { applications, savedJobs } = useApp();
   const { user, profile, signOut } = useAuth();
+  const { savedJobIds, isLoading: savedJobsLoading } = useSavedJobs();
+  const { applications, isLoading: applicationsLoading } = useApplications();
+  const { jobs } = useAllJobs();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'applications' | 'saved' | 'profile'>('applications');
 
-  const savedJobsList = jobs.filter(job => savedJobs.includes(job.id));
+  // Get saved jobs with full details
+  const savedJobsList = jobs.filter(job => savedJobIds.includes(job.id));
 
   const handleSignOut = async () => {
     await signOut();
@@ -74,6 +78,8 @@ const CandidateDashboard = () => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
+
+  const isLoading = savedJobsLoading || applicationsLoading;
 
   return (
     <PageLayout>
@@ -129,7 +135,7 @@ const CandidateDashboard = () => {
                 <Heart className="w-6 h-6 text-destructive" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-foreground">{savedJobs.length}</div>
+                <div className="text-2xl font-bold text-foreground">{savedJobIds.length}</div>
                 <div className="text-sm text-muted-foreground">Saved Jobs</div>
               </div>
             </div>
@@ -205,7 +211,12 @@ const CandidateDashboard = () => {
                     </Link>
                   </Button>
                 </div>
-                {applications.length === 0 ? (
+                {applicationsLoading ? (
+                  <div className="bg-card rounded-2xl border border-border p-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                    <p className="text-muted-foreground mt-4">Loading applications...</p>
+                  </div>
+                ) : applications.length === 0 ? (
                   <div className="bg-card rounded-2xl border border-border p-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                       <FileText className="w-8 h-8 text-muted-foreground" />
@@ -227,13 +238,13 @@ const CandidateDashboard = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl btn-gradient flex items-center justify-center text-white font-bold">
-                            {app.company.charAt(0)}
+                            {app.jobs?.company?.charAt(0) || 'J'}
                           </div>
                           <div>
-                            <h3 className="font-semibold text-foreground">{app.jobTitle}</h3>
+                            <h3 className="font-semibold text-foreground">{app.jobs?.title || 'Job'}</h3>
                             <p className="text-sm text-muted-foreground flex items-center gap-1">
                               <Building2 className="w-4 h-4" />
-                              {app.company}
+                              {app.jobs?.company || 'Company'}
                             </p>
                           </div>
                         </div>
@@ -243,7 +254,7 @@ const CandidateDashboard = () => {
                             {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {new Date(app.submittedAt).toLocaleDateString()}
+                            {new Date(app.created_at).toLocaleDateString()}
                           </span>
                         </div>
                       </div>
@@ -256,7 +267,12 @@ const CandidateDashboard = () => {
             {activeTab === 'saved' && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-foreground">Saved Jobs</h2>
-                {savedJobsList.length === 0 ? (
+                {savedJobsLoading ? (
+                  <div className="bg-card rounded-2xl border border-border p-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                    <p className="text-muted-foreground mt-4">Loading saved jobs...</p>
+                  </div>
+                ) : savedJobsList.length === 0 ? (
                   <div className="bg-card rounded-2xl border border-border p-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
                       <Heart className="w-8 h-8 text-muted-foreground" />
@@ -278,7 +294,7 @@ const CandidateDashboard = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl btn-gradient flex items-center justify-center text-white font-bold">
-                            {job.logo}
+                            {job.company.charAt(0)}
                           </div>
                           <div>
                             <Link to={`/jobs/${job.id}`} className="font-semibold text-foreground hover:text-primary">

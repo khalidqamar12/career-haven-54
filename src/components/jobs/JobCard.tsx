@@ -3,19 +3,28 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TransformedJob } from '@/hooks/useJobs';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface JobCardProps {
   job: TransformedJob;
   index?: number;
 }
 
-import { useApp } from '@/contexts/AppContext';
-
 const JobCard = ({ job, index = 0 }: JobCardProps) => {
-  const { savedJobs, toggleSavedJob } = useApp();
-  // Convert string ID to number for savedJobs compatibility
-  const numericId = typeof job.id === 'string' ? parseInt(job.id, 10) : job.id;
-  const isSaved = !isNaN(numericId) && savedJobs.includes(numericId);
+  const { user } = useAuth();
+  const { isJobSaved, toggleSavedJob, isSaving } = useSavedJobs();
+  const isSaved = isJobSaved(job.id);
+
+  const handleToggleSave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please sign in to save jobs');
+      return;
+    }
+    toggleSavedJob(job.id);
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -54,13 +63,9 @@ const JobCard = ({ job, index = 0 }: JobCardProps) => {
 
       {/* Save Button */}
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          if (!isNaN(numericId)) {
-            toggleSavedJob(numericId);
-          }
-        }}
-        className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors"
+        onClick={handleToggleSave}
+        disabled={isSaving}
+        className="absolute top-6 right-6 p-2 rounded-full hover:bg-muted transition-colors disabled:opacity-50"
       >
         <Heart
           className={`w-5 h-5 transition-colors ${

@@ -17,27 +17,58 @@ import {
   XCircle,
   MapPin,
   DollarSign,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
-import { jobs } from '@/lib/data';
-import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Tables } from '@/integrations/supabase/types';
+
+type JobWithApplications = Tables<'jobs'> & {
+  applications: Tables<'applications'>[];
+};
 
 const EmployerDashboard = () => {
-  const { applications } = useApp();
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'jobs' | 'applications' | 'settings'>('overview');
 
-  // Simulate employer's posted jobs (first 4 jobs)
-  const postedJobs = jobs.slice(0, 4);
+  // Fetch employer's posted jobs with applications
+  const { data: postedJobs = [], isLoading: jobsLoading } = useQuery({
+    queryKey: ['employer-jobs', profile?.id],
+    queryFn: async () => {
+      if (!profile?.id) return [];
 
-  // Get applications for employer's jobs
-  const employerApplications = applications.filter(app => 
-    postedJobs.some(job => job.id === app.jobId)
+      const { data, error } = await supabase
+        .from('jobs')
+        .select(`
+          *,
+          applications (*)
+        `)
+        .eq('employer_id', profile.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching employer jobs:', error);
+        throw error;
+      }
+
+      return data as JobWithApplications[];
+    },
+    enabled: !!profile?.id,
+  });
+
+  // Get all applications for employer's jobs
+  const employerApplications = postedJobs.flatMap(job => 
+    job.applications.map(app => ({
+      ...app,
+      jobTitle: job.title,
+      company: job.company,
+    }))
   );
 
   const handleSignOut = async () => {
@@ -66,6 +97,49 @@ const EmployerDashboard = () => {
     if (!name) return 'E';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
+
+  const formatSalary = (min?: number | null, max?: number | null): string => {
+    if (!min && !max) return 'Competitive';
+    if (min && max) return `$${Math.round(min / 1000)}k - $${Math.round(max / 1000)}k`;
+    if (min) return `$${Math.round(min / 1000)}k+`;
+    if (max) return `Up to $${Math.round(max / 1000)}k`;
+    return 'Competitive';
+  };
+
+  const formatPosted = (createdAt: string): string => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 14) return '1 week ago';
+    return `${Math.floor(diffDays / 7)} weeks ago`;
+  };
+
+  const mapJobType = (dbType: string): string => {
+    const typeMap: Record<string, string> = {
+      'full-time': 'Full-time',
+      'part-time': 'Part-time',
+      'remote': 'Remote',
+      'contract': 'Contract',
+      'internship': 'Internship',
+    };
+    return typeMap[dbType] || 'Full-time';
+  };
+
+  if (jobsLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground mt-4">Loading dashboard...</p>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -127,7 +201,9 @@ const EmployerDashboard = () => {
                 <TrendingUp className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-foreground">89%</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {employerApplications.length > 0 ? '89%' : '0%'}
+                </div>
                 <div className="text-sm text-muted-foreground">Response Rate</div>
               </div>
             </div>
@@ -228,10 +304,10 @@ const EmployerDashboard = () => {
                         <div key={app.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                              {app.fullName.charAt(0)}
+                              C
                             </div>
                             <div>
-                              <p className="font-medium text-foreground">{app.fullName}</p>
+                              <p className="font-medium text-foreground">Candidate</p>
                               <p className="text-sm text-muted-foreground">{app.jobTitle}</p>
                             </div>
                           </div>
@@ -252,27 +328,31 @@ const EmployerDashboard = () => {
                       View All
                     </Button>
                   </div>
-                  <div className="space-y-3">
-                    {postedJobs.slice(0, 3).map(job => (
-                      <div key={job.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-sm">
-                            {job.logo}
+                  {postedJobs.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No jobs posted yet</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {postedJobs.slice(0, 3).map(job => (
+                        <div key={job.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-sm">
+                              {job.company.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{job.title}</p>
+                              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                <MapPin className="w-3 h-3" />
+                                {job.location}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground">{job.title}</p>
-                            <p className="text-sm text-muted-foreground flex items-center gap-2">
-                              <MapPin className="w-3 h-3" />
-                              {job.location}
-                            </p>
+                          <div className="text-right">
+                            <Badge variant="secondary">{mapJobType(job.job_type)}</Badge>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <Badge variant="secondary">{job.type}</Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -281,72 +361,86 @@ const EmployerDashboard = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-foreground">Posted Jobs</h2>
-                  <Button variant="gradient" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Post New Job
+                  <Button variant="gradient" size="sm" asChild>
+                    <Link to="/employer/post-job">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Post New Job
+                    </Link>
                   </Button>
                 </div>
-                {postedJobs.map(job => (
-                  <div key={job.id} className="bg-card rounded-2xl border border-border p-6">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="w-14 h-14 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                        {job.logo}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                          <div>
-                            <h3 className="font-semibold text-foreground">{job.title}</h3>
-                            <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
-                                {job.location}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <DollarSign className="w-4 h-4" />
-                                {job.salary}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {job.posted}
-                              </span>
+                {postedJobs.length === 0 ? (
+                  <div className="bg-card rounded-2xl border border-border p-12 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <Briefcase className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No jobs posted yet</h3>
+                    <p className="text-muted-foreground mb-6">Start posting jobs to find great candidates</p>
+                    <Button asChild>
+                      <Link to="/employer/post-job">Post Your First Job</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  postedJobs.map(job => (
+                    <div key={job.id} className="bg-card rounded-2xl border border-border p-6">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-14 h-14 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                          {job.company.charAt(0)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <div>
+                              <h3 className="font-semibold text-foreground">{job.title}</h3>
+                              <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {job.location}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  {formatSalary(job.salary_min, job.salary_max)}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {formatPosted(job.created_at)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">{mapJobType(job.job_type)}</Badge>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary">{job.type}</Badge>
-                            {job.featured && (
-                              <Badge className="bg-primary/10 text-primary border-primary/20 border">Featured</Badge>
-                            )}
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {(job.skills || []).map(skill => (
+                              <span key={skill} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-lg">
+                                {skill}
+                              </span>
+                            ))}
                           </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {job.skills.map(skill => (
-                            <span key={skill} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-lg">
-                              {skill}
+                          <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border">
+                            <span className="text-sm text-muted-foreground">
+                              {job.applications.length} applications
                             </span>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border">
-                          <span className="text-sm text-muted-foreground">
-                            {employerApplications.filter(a => a.jobId === job.id).length} applications
-                          </span>
-                          <div className="flex-1" />
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
-                          </Button>
+                            <div className="flex-1" />
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link to={`/jobs/${job.id}`}>
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Link>
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             )}
 
@@ -366,39 +460,39 @@ const EmployerDashboard = () => {
                     <div key={app.id} className="bg-card rounded-2xl border border-border p-6">
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl flex-shrink-0">
-                          {app.fullName.charAt(0)}
+                          C
                         </div>
                         <div className="flex-1">
                           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                             <div>
-                              <h3 className="font-semibold text-foreground">{app.fullName}</h3>
-                              <p className="text-sm text-muted-foreground">{app.email}</p>
+                              <h3 className="font-semibold text-foreground">Candidate</h3>
                               <p className="text-sm text-muted-foreground mt-1">
                                 Applied for: <span className="text-foreground">{app.jobTitle}</span>
                               </p>
                             </div>
                             <Badge className={`${getStatusColor(app.status)} border`}>
-                              {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                              {app.status}
                             </Badge>
                           </div>
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {app.skills.map(skill => (
-                              <span key={skill} className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-lg">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
+                          {app.cover_letter && (
+                            <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
+                              {app.cover_letter}
+                            </p>
+                          )}
                           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border">
                             <span className="text-xs text-muted-foreground">
-                              Applied {new Date(app.submittedAt).toLocaleDateString()}
+                              Applied {formatPosted(app.created_at)}
                             </span>
                             <div className="flex-1" />
-                            <Button variant="ghost" size="sm">View Profile</Button>
+                            <Button variant="outline" size="sm">
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
                             <Button variant="outline" size="sm" className="text-success border-success/20 hover:bg-success/10">
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Shortlist
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                            <Button variant="outline" size="sm" className="text-destructive border-destructive/20 hover:bg-destructive/10">
                               <XCircle className="w-4 h-4 mr-1" />
                               Reject
                             </Button>
