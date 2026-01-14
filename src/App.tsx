@@ -13,6 +13,7 @@ import ApplyForm from "./pages/ApplyForm";
 import Login from "./pages/Login";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import EmployerDashboard from "./pages/EmployerDashboard";
+import PostJob from "./pages/PostJob";
 import TestimonialsPage from "./pages/TestimonialsPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -42,6 +43,11 @@ const App = () => (
               <Route path="/employer/dashboard" element={
                 <ProtectedRoute requiredUserType="employer">
                   <EmployerDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/employer/post-job" element={
+                <ProtectedRoute requiredUserType="employer">
+                  <PostJob />
                 </ProtectedRoute>
               } />
               <Route path="/testimonials" element={<TestimonialsPage />} />
