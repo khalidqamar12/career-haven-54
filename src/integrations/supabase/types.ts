@@ -72,7 +72,7 @@ export type Database = {
           company_logo: string | null
           created_at: string
           description: string
-          employer_id: string
+          employer_id: string | null
           experience_level: string | null
           id: string
           job_type: Database["public"]["Enums"]["job_type"]
@@ -91,7 +91,7 @@ export type Database = {
           company_logo?: string | null
           created_at?: string
           description: string
-          employer_id: string
+          employer_id?: string | null
           experience_level?: string | null
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
@@ -110,7 +110,7 @@ export type Database = {
           company_logo?: string | null
           created_at?: string
           description?: string
-          employer_id?: string
+          employer_id?: string | null
           experience_level?: string | null
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
