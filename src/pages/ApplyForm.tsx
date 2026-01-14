@@ -462,8 +462,10 @@ const ApplyForm = () => {
             <div className="sticky top-28 bg-card rounded-2xl border border-border p-6">
               <h3 className="font-semibold text-foreground mb-4">Applying for</h3>
               <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-xl btn-gradient flex items-center justify-center text-white font-bold text-lg shadow-md">
-                  {job.logo}
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center shadow-md border border-border overflow-hidden">
+                  <span className="text-primary font-bold text-lg">
+                    {job.company.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                  </span>
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground">{job.title}</h4>
