@@ -19,18 +19,28 @@ import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
 import JobCard from '@/components/jobs/JobCard';
 import { useJob, useAllJobs } from '@/hooks/useJobs';
-import { useApp } from '@/contexts/AppContext';
+import { useSavedJobs } from '@/hooks/useSavedJobs';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const JobDetails = () => {
   const { id } = useParams();
-  const { savedJobs, toggleSavedJob } = useApp();
+  const { user } = useAuth();
+  const { isJobSaved, toggleSavedJob, isSaving } = useSavedJobs();
   const { data: job, isLoading } = useJob(id || '');
   const { jobs: allJobs } = useAllJobs();
   
-  // Convert string ID to number for savedJobs compatibility
-  const numericId = id ? parseInt(id, 10) : NaN;
-  const isSaved = !isNaN(numericId) && savedJobs.includes(numericId);
+  const isSaved = id ? isJobSaved(id) : false;
+
+  const handleToggleSave = () => {
+    if (!user) {
+      toast.error('Please sign in to save jobs');
+      return;
+    }
+    if (id) {
+      toggleSavedJob(id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -147,8 +157,9 @@ const JobDetails = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => !isNaN(numericId) && toggleSavedJob(numericId)}
-                        className="p-2 rounded-lg hover:bg-muted transition-colors"
+                        onClick={handleToggleSave}
+                        disabled={isSaving}
+                        className="p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                       >
                         <Heart
                           className={`w-5 h-5 ${
@@ -272,7 +283,8 @@ const JobDetails = () => {
                   variant="outline"
                   size="lg"
                   className="w-full"
-                  onClick={() => !isNaN(numericId) && toggleSavedJob(numericId)}
+                  onClick={handleToggleSave}
+                  disabled={isSaving}
                 >
                   <Heart
                     className={`w-4 h-4 mr-2 ${

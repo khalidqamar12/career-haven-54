@@ -1,22 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Application } from '@/lib/data';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  type: 'candidate' | 'employer';
-  avatar?: string;
-}
 
 interface AppContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  savedJobs: number[];
-  toggleSavedJob: (jobId: number) => void;
-  applications: Application[];
-  addApplication: (application: Application) => void;
-  updateApplicationStatus: (id: string, status: Application['status']) => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
@@ -24,26 +8,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [savedJobs, setSavedJobs] = useState<number[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleSavedJob = (jobId: number) => {
-    setSavedJobs(prev =>
-      prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]
-    );
-  };
-
-  const addApplication = (application: Application) => {
-    setApplications(prev => [...prev, application]);
-  };
-
-  const updateApplicationStatus = (id: string, status: Application['status']) => {
-    setApplications(prev =>
-      prev.map(app => (app.id === id ? { ...app, status } : app))
-    );
-  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(prev => {
@@ -60,13 +25,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        user,
-        setUser,
-        savedJobs,
-        toggleSavedJob,
-        applications,
-        addApplication,
-        updateApplicationStatus,
         isDarkMode,
         toggleDarkMode
       }}
@@ -83,3 +41,4 @@ export function useApp() {
   }
   return context;
 }
+

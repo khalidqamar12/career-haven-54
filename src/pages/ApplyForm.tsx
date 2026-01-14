@@ -22,13 +22,15 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import PageLayout from '@/components/layout/PageLayout';
 import { useJob } from '@/hooks/useJobs';
-import { useApp } from '@/contexts/AppContext';
+import { useApplications } from '@/hooks/useApplications';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const ApplyForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addApplication } = useApp();
+  const { user, profile } = useAuth();
+  const { createApplication, hasApplied, isSubmitting: isAppSubmitting } = useApplications();
   
   const { data: job, isLoading: jobLoading } = useJob(id || '');
   
@@ -147,6 +149,17 @@ const ApplyForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast.error('Please sign in to apply');
+      navigate('/login');
+      return;
+    }
+
+    if (hasApplied(job.id)) {
+      toast.error('You have already applied to this job');
+      return;
+    }
+    
     if (!validateForm()) {
       toast.error('Please fill in all required fields');
       return;
@@ -154,32 +167,21 @@ const ApplyForm = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const application = {
-      id: `app-${Date.now()}`,
-      jobId: job.id,
-      jobTitle: job.title,
-      company: job.company,
-      fullName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      resume: resumeFile?.name || '',
-      portfolio: formData.portfolio,
-      linkedin: formData.linkedin,
-      coverLetter: formData.coverLetter,
-      experience: formData.experience,
-      skills: formData.skills,
-      availability: formData.availability,
-      submittedAt: new Date(),
-      status: 'pending' as const
-    };
-
-    addApplication(application);
-    setIsSubmitting(false);
-    setSubmitted(true);
-    toast.success('Application submitted successfully!');
+    try {
+      await createApplication({
+        jobId: job.id,
+        coverLetter: formData.coverLetter,
+        // Resume URL would be set after file upload implementation
+      });
+      
+      setSubmitted(true);
+      toast.success('Application submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error('Failed to submit application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
